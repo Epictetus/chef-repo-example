@@ -14,7 +14,7 @@ if [ "${TARGET_HOST}" == "" ] ; then
 fi
 
 # chef-soloが入っていなければインストール
-ssh ${TO_CHEF_USER}@${TARGET_HOST} -C "which chef-solo"
+ssh ${TO_CHEF_USER}@${TARGET_HOST} -C "which -s chef-solo"
 if [ "$?" == "1" ] ; then
   ssh ${TO_CHEF_USER}@${TARGET_HOST} -t -C "export http_proxy=${PROXY}; curl -L http://opscode.com/chef/install.sh | sudo -E bash"
 fi
