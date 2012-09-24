@@ -1,0 +1,10 @@
+今回の記事で扱っている、chef-repoです。
+run_chefコマンドを使用するには、お使いの環境に合わせて
+下記の環境変数を書き換えて使用してください。
+
+FROM_CHEF_REPO_PATH=/home/${USER}/chef-repo   # レシピを編集するマシンのchef-repoディレクトリ
+TO_CHEF_USER=${USER}                          # 設定対象マシンのユーザ
+TO_CHEF_REPO_PATH=/tmp/chef-solo              # 設定対象マシンのchef-repoディレクトリ
+PROXY=""                                      # プロキシサーバ（必要に応じて）
+
+
