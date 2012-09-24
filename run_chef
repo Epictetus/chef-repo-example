@@ -1,0 +1,37 @@
+#!/bin/sh
+
+TARGET_HOST=$1                                           # chef-soloを実行するホスト
+NODE_FILE=$2                                             # 実行するノードファイル
+FROM_CHEF_REPO_PATH=/home/${USER}/chef-repo              # レシピを編集するマシンのchef-repoディレクトリ
+TO_CHEF_USER=${USER}                                     # 設定対象マシンのユーザ
+TO_CHEF_REPO_PATH=/tmp/chef-solo                         # 設定対象マシンのchef-repoディレクトリ
+PROXY=""                                                 # プロキシサーバ（必要に応じて）
+
+# パラメータチェック
+if [ "${TARGET_HOST}" == "" ] ; then
+echo "usage : run_chef [target_host] [node_file]" >&2
+  exit 255
+fi
+
+# chef-soloが入っていなければインストール
+ssh ${TO_CHEF_USER}@${TARGET_HOST} -C "which chef-solo"
+if [ "$?" == "1" ] ; then
+ssh ${TO_CHEF_USER}@${TARGET_HOST} -t -C "export http_proxy=${PROXY}; curl -L http://opscode.com/chef/install.sh | sudo -E bash"
+fi
+
+# レシピをまるごとコピー
+rsync -av ${FROM_CHEF_REPO_PATH}/ ${TO_CHEF_USER}@${TARGET_HOST}:${TO_CHEF_REPO_PATH}/
+
+# chef-soloを実行する
+ssh ${TO_CHEF_USER}@${TARGET_HOST} -t -C "sudo -E chef-solo -c ${TO_CHEF_REPO_PATH}/solo.rb -j ${TO_CHEF_REPO_PATH}/${NODE_FILE}"
+
+# エラーが発生していたら、スタックトレースを表示する
+if [ "$?" == "0" ] ; then
+  echo "[SUCCESS]"
+else 
+  echo "################ Stack trace begin ###############"
+  ssh ${TO_CHEF_USER}@${TARGET_HOST} -t -C "sudo cat ${TO_CHEF_REPO_PATH}/chef-stacktrace.out"
+  echo "################ Stack trace end   ###############"
+  echo "[FAILED]"
+fi
+
