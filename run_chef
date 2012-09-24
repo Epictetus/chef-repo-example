@@ -9,14 +9,14 @@ PROXY=""                                                 # プロキシサーバ
 
 # パラメータチェック
 if [ "${TARGET_HOST}" == "" ] ; then
-echo "usage : run_chef [target_host] [node_file]" >&2
+  echo "usage : run_chef [target_host] [node_file]" >&2
   exit 255
 fi
 
 # chef-soloが入っていなければインストール
 ssh ${TO_CHEF_USER}@${TARGET_HOST} -C "which chef-solo"
 if [ "$?" == "1" ] ; then
-ssh ${TO_CHEF_USER}@${TARGET_HOST} -t -C "export http_proxy=${PROXY}; curl -L http://opscode.com/chef/install.sh | sudo -E bash"
+  ssh ${TO_CHEF_USER}@${TARGET_HOST} -t -C "export http_proxy=${PROXY}; curl -L http://opscode.com/chef/install.sh | sudo -E bash"
 fi
 
 # レシピをまるごとコピー
